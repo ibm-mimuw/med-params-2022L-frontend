@@ -20,8 +20,6 @@ import {
 
 import "./index.scss";
 
-const PAGE_SIZE = 10; // Number of items to display per page
-
 const cities = [
   " ",
   "Gdańsk",
@@ -42,24 +40,43 @@ const App = () => {
       id: 0,
     },
   ]);
+  const [displayData, setDisplayData] = useState([
+    {
+      id: 0,
+    },
+  ]);
+  const [PAGE_SIZE, setPAGE_SIZE] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedSwitcherOption, setSelectedSwitcherOption] =
-    useState("option1");
-  const [selectedDropdownOption, setSelectedDropdownOption] =
-    useState("default");
+  const [selectedSwitcherOption, setSelectedSwitcherOption] = useState("0");
+  const [selectedDropdownOption, setSelectedDropdownOption] = useState(" ");
   const [lookupValue, setLookupValue] = useState("");
+
+  useEffect(() => {
+    setCurrentPage(1)
+  },[selectedSwitcherOption, selectedDropdownOption, lookupValue]);
+
+  useEffect(() => {
+    setDisplayData(
+      data.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE - 1)
+    );
+  },[PAGE_SIZE, currentPage, data]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        var url = `/rest/person/?status=${selectedSwitcherOption}&city=${selectedDropdownOption}`;
+        var url = `/rest/person/?status=${selectedSwitcherOption}&name=${lookupValue}&city=${selectedDropdownOption}`;
 
         await fetch(url)
           .then(function (response) {
             return response.json();
           })
-          .then(function (datta) {
-            return datta.map((elem, index) => ({ id: index, ...elem }));
+          .then(function (data) {
+            return data.map((elem, index) => ({ id: index, ...elem }));
+          })
+          .then(function (data) {
+            return data.sort(function (a, b) {
+              return a.status > b.status ? 1 : -1;
+            });
           })
           .then(function (jsonData) {
             setData(jsonData);
@@ -69,13 +86,18 @@ const App = () => {
       }
     };
 
-    const interval = setInterval(fetchData, 1000); // Refresh data every second
+    const interval = setInterval(fetchData, 500);
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, [currentPage, selectedSwitcherOption, selectedDropdownOption]);
+    return () => clearInterval(interval);
+  }, [
+    selectedSwitcherOption,
+    selectedDropdownOption,
+    lookupValue,
+  ]);
 
-  const handlePaginationChange = ({ page }) => {
+  const handlePaginationChange = ({ page, pageSize}) => {
     setCurrentPage(page);
+    setPAGE_SIZE(pageSize)
   };
 
   const handleSwitcherChange = (event) => {
@@ -136,7 +158,7 @@ const App = () => {
               onChange={handleDropdownChange}
             />
           </div>
-          <div>
+          <div className="lookup-container">
             <TextInput
               id="lookup"
               placeholder="imię pacjenta"
@@ -147,8 +169,17 @@ const App = () => {
         </div>
 
         <div className="table-container">
+          <div className="pagination-container">
+            <Pagination
+              totalItems={data.length}
+              page={currentPage}
+              pageSize={PAGE_SIZE}
+              pageSizes={[10, 20, 30, 40]} // Customize the available page sizes if desired
+              onChange={handlePaginationChange}
+            />
+          </div>
           <DataTable
-            rows={data}
+            rows={displayData}
             headers={[
               { key: "name", header: "Name" },
               // { key: "surname", header: "Surname" },
@@ -183,15 +214,6 @@ const App = () => {
               </TableContainer>
             )}
           </DataTable>
-          <div className="pagination-container">
-            <Pagination
-              totalItems={data.length}
-              page={currentPage}
-              pageSize={PAGE_SIZE}
-              pageSizes={[10, 20, 30, 40]} // Customize the available page sizes if desired
-              onChange={handlePaginationChange}
-            />
-          </div>
         </div>
       </div>
     </>

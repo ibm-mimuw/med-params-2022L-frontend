@@ -13,13 +13,19 @@
 }
 
 .content-switcher-container {
-  margin-right: 20px;
-  min-width: 230px;
+  margin-right: 5%;
+  width: 30%;
 }
 
 .dropdown-container {
   flex-grow: 1;
-  max-width: 300px;
+  margin-right: 5%;
+  width: 30%;
+}
+
+.lookup-container {
+  flex-grow: 1;
+  width: 30%;
 }
 
 .table-container {
