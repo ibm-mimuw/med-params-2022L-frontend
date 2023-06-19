@@ -1,0 +1,36 @@
+@use '@carbon/react';
+
+.content-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.content-switcher-container {
+  margin-right: 20px;
+  min-width: 230px;
+}
+
+.dropdown-container {
+  flex-grow: 1;
+  max-width: 300px;
+}
+
+.table-container {
+  margin-bottom: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.table-title {
+  margin-bottom: 10px;
+}
