@@ -16,7 +16,9 @@ import {
   HeaderName,
   Dropdown,
   TextInput,
+  Loading,
 } from "carbon-components-react";
+import { useNavigate } from "react-router-dom";
 
 import "./index.scss";
 
@@ -45,11 +47,14 @@ const App = () => {
       id: 0,
     },
   ]);
+  const [loading, setLoading] = useState(true);
   const [PAGE_SIZE, setPAGE_SIZE] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSwitcherOption, setSelectedSwitcherOption] = useState("0");
   const [selectedDropdownOption, setSelectedDropdownOption] = useState(" ");
   const [lookupValue, setLookupValue] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCurrentPage(1)
@@ -71,22 +76,21 @@ const App = () => {
             return response.json();
           })
           .then(function (data) {
-            return data.map((elem, index) => ({ id: index, ...elem }));
-          })
-          .then(function (data) {
             return data.sort(function (a, b) {
               return a.status > b.status ? 1 : -1;
             });
           })
           .then(function (jsonData) {
             setData(jsonData);
+            setLoading(false);
           });
       } catch (error) {
+        setLoading(false);
         console.error("Error fetching data:", error);
       }
     };
 
-    const interval = setInterval(fetchData, 500);
+    const interval = setInterval(fetchData, 2000);
 
     return () => clearInterval(interval);
   }, [
@@ -117,7 +121,7 @@ const App = () => {
       <HeaderContainer
         render={({ isSideNavExpanded, onClickSideNavExpand }) => (
           <Header aria-label="App header">
-            <HeaderName href="#" prefix="monitor">
+            <HeaderName href="#" prefix="Monitor">
               stanu pacjenta
             </HeaderName>
           </Header>
@@ -181,11 +185,11 @@ const App = () => {
           <DataTable
             rows={displayData}
             headers={[
-              { key: "name", header: "Name" },
+              { key: "name", header: "Imię i nazwisko" },
               // { key: "surname", header: "Surname" },
-              { key: "city", header: "City" },
-              { key: "birthdate", header: "Birthdate" },
-              { key: "sex", header: "Sex" },
+              { key: "city", header: "Miasto" },
+              { key: "birthdate", header: "Data urodzenia" },
+              { key: "sex", header: "Płeć" },
               { key: "status", header: "Status" },
             ]}
           >
@@ -203,7 +207,7 @@ const App = () => {
                   </TableHead>
                   <TableBody>
                     {rows.map((row) => (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} onClick={() => navigate(`${row.id}`)}>
                         {row.cells.map((cell) => (
                           <TableCell key={cell.id}>{cell.value}</TableCell>
                         ))}
@@ -215,6 +219,7 @@ const App = () => {
             )}
           </DataTable>
         </div>
+        <Loading active={loading} withOverlay={false} small={false} style={{marginLeft: 'auto', marginRight: 'auto'}} />
       </div>
     </>
   );
